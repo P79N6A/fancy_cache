@@ -1,0 +1,31 @@
+<configuration>
+
+    <property name="pattern" value="%d %p [%t] %c{20} %X{traceId:--} %m%n"/>
+
+    <appender name="STD_OUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="cachex" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${user.home}/logs/cachex/cachex.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${user.dir}/logs/cachex/cachex.log.%d{yyyy-MM-dd}</fileNamePattern>
+            <maxHistory>1</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STD_OUT"/>
+    </root>
+
+    <logger name="com.github.cachex">
+        <appender-ref ref="cachex"/>
+        <appender-ref ref="STD_OUT"/>
+    </logger>
+
+</configuration>

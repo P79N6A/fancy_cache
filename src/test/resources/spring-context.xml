@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <!-- 启用自动代理: 如果已经开启则不必重复开启 -->
+    <aop:aspectj-autoproxy/>
+
+    <!--
+    <bean class="CacheProxy">
+        <constructor-arg name="target" >
+            <bean class="UserServiceImpl"/>
+        </constructor-arg>
+        <constructor-arg name="caches" ref="caches"/>
+    </bean>
+    -->
+
+    <bean class="pers.fancy.cache.CacheAspect">
+        <constructor-arg name="config">
+            <bean class="pers.fancy.cache.core.CacheConfig">
+                <property name="caches" ref="caches"/>
+                <property name="swc" value="ON"/>
+                <property name="prevent" value="OFF"/>
+                <property name="shootingMXBean" ref="memoryShootingMXBean"/>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <util:map id="caches" map-class="java.util.LinkedHashMap">
+        <entry key="guava" value-ref="guavaCache"/>
+    </util:map>
+
+    <bean id="guavaCache" class="pers.fancy.cache.support.cache.GuavaCache" lazy-init="true">
+        <constructor-arg name="size" value="1000"/>
+        <constructor-arg name="expire" value="6000"/>
+    </bean>
+    <bean id="ehCache" class="pers.fancy.cache.support.cache.EhCache" lazy-init="true">
+        <constructor-arg name="heapEntries" value="20"/>
+        <constructor-arg name="offHeapMBSize" value="512"/>
+        <constructor-arg name="diskGBSize" value="1"/>
+    </bean>
+
+    <!-- 命中率统计: 根据具体业务场景选择一款实现注入即可 -->
+    <bean id="memoryShootingMXBean" class="pers.fancy.cache.support.shooting.MemoryShootingMXBeanImpl"
+          lazy-init="true"/>
+
+    <context:component-scan base-package="pers.fancy.cache.service.impl"/>
+</beans>
